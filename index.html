@@ -34,32 +34,17 @@
     .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
 
     /* Natural Walking Cycle */
-    @keyframes walkArmLeft {
-      0%, 100% { transform: rotate(18deg); }
-      50% { transform: rotate(-22deg); }
-    }
-    @keyframes walkArmRight {
-      0%, 100% { transform: rotate(-22deg); }
-      50% { transform: rotate(18deg); }
-    }
-    @keyframes walkLegLeft {
-      0%, 100% { transform: rotate(-18deg); }
-      50% { transform: rotate(20deg); }
-    }
-    @keyframes walkLegRight {
-      0%, 100% { transform: rotate(20deg); }
-      50% { transform: rotate(-18deg); }
-    }
-    @keyframes bodyBob {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-4px); }
-    }
+    @keyframes walkArmL { 0%, 100% { transform: rotate(18deg); } 50% { transform: rotate(-22deg); } }
+    @keyframes walkArmR { 0%, 100% { transform: rotate(-22deg); } 50% { transform: rotate(18deg); } }
+    @keyframes walkLegL { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(20deg); } }
+    @keyframes walkLegR { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-18deg); } }
+    @keyframes bodyBob { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
 
-    .is-walking .robot-head-body { animation: bodyBob 0.6s ease-in-out infinite; }
-    .is-walking .arm-l { animation: walkArmLeft 0.6s ease-in-out infinite alternate; }
-    .is-walking .arm-r { animation: walkArmRight 0.6s ease-in-out infinite alternate; }
-    .is-walking .leg-l { animation: walkLegLeft 0.6s ease-in-out infinite alternate; }
-    .is-walking .leg-r { animation: walkLegRight 0.6s ease-in-out infinite alternate; }
+    .is-walking .robot-head-body { animation: bodyBob 0.55s ease-in-out infinite; }
+    .is-walking .arm-l { animation: walkArmL 0.55s ease-in-out infinite alternate; }
+    .is-walking .arm-r { animation: walkArmR 0.55s ease-in-out infinite alternate; }
+    .is-walking .leg-l { animation: walkLegL 0.55s ease-in-out infinite alternate; }
+    .is-walking .leg-r { animation: walkLegR 0.55s ease-in-out infinite alternate; }
 
     /* Panicked Flailing when dragged */
     @keyframes flailArmL { 0%, 100% { transform: rotate(70deg); } 50% { transform: rotate(-80deg); } }
@@ -72,10 +57,7 @@
     .struggling .leg-r { animation: flailLeg 0.12s ease-in-out infinite alternate-reverse !important; }
 
     /* Parachute Swaying */
-    @keyframes parachuteSway {
-      0%, 100% { transform: rotate(-7deg); }
-      50% { transform: rotate(7deg); }
-    }
+    @keyframes parachuteSway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
     .parachuting { animation: parachuteSway 1.6s ease-in-out infinite alternate; }
   </style>
 </head>
@@ -106,7 +88,7 @@
       <!-- Keywords Settings -->
       <button onclick="openKeywordModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs sm:text-sm font-medium hover:border-amber-500 transition">
         <span>⚙️</span>
-        <span class="hidden sm:inline">Keywords (<span id="keywordCount">0</span>)</span>
+        <span class="hidden sm:inline">Keywords (<span id="keywordCount">19</span>)</span>
       </button>
 
       <!-- Day/Night Toggle -->
@@ -253,10 +235,10 @@
   </main>
 
   <!-- ================= REFERENCE 5 BOT (GLOSSY WHITE CUTE AI MASCOT) ================= -->
-  <div id="robotWrapper" class="fixed z-50 cursor-grab active:cursor-grabbing" style="left: 60px; bottom: 15px;">
+  <div id="robotWrapper" class="fixed z-50 cursor-grab active:cursor-grabbing" style="left: 40px; bottom: 15px;">
     
     <!-- Parachute SVG -->
-    <div id="robotParachute" class="absolute -top-[100px] left-1/2 -translate-x-1/2 hidden pointer-events-none transition-all duration-300">
+    <div id="robotParachute" style="display: none;" class="absolute -top-[100px] left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300">
       <svg width="130" height="100" viewBox="0 0 120 95" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M10 50 C 10 10, 110 10, 110 50 C 95 45, 85 45, 75 50 C 65 45, 55 45, 45 50 C 35 45, 25 45, 10 50 Z" fill="#38bdf8" />
         <path d="M45 50 C 55 45, 65 45, 75 50 C 70 20, 50 20, 45 50 Z" fill="#ffffff" />
@@ -269,10 +251,10 @@
       </svg>
     </div>
 
-    <!-- Speech Bubble (Hidden while walking, shown when hovered, peeking or dragged) -->
-    <div id="robotSpeechBubble" class="absolute -top-16 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-900 border-2 border-amber-400 dark:border-amber-500 rounded-2xl px-3.5 py-1.5 shadow-2xl whitespace-nowrap hidden items-center gap-2 pointer-events-auto transition-transform" style="transform: translate(-50%, 0);">
+    <!-- Speech Bubble -->
+    <div id="robotSpeechBubble" style="display: none; transform: translate(-50%, 0);" class="absolute -top-16 left-1/2 bg-white dark:bg-gray-900 border-2 border-amber-400 dark:border-amber-500 rounded-2xl px-3.5 py-1.5 shadow-2xl whitespace-nowrap items-center gap-2 pointer-events-auto transition-transform">
       <span id="speechBubbleText" class="text-xs font-bold text-gray-800 dark:text-gray-100 flex items-center gap-1">
-        <span>👋</span> কোনো হেল্প লাগবে?
+        <span>👋</span> কিছু লাগবে কি?
       </span>
       <div id="speechActionButtons" class="flex items-center gap-1.5">
         <button onclick="acceptRobotHelp(event)" class="bg-amber-500 hover:bg-amber-400 text-gray-900 text-xs font-bold px-2.5 py-0.5 rounded-lg transition active:scale-90">
@@ -285,31 +267,28 @@
       <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-amber-400 dark:border-t-amber-500"></div>
     </div>
 
-    <!-- Robot Visual Container (Reference 5: White Chibi Robot with Yellow Glowing Eyes & Ears) -->
+    <!-- Robot Visual SVG Container (Reference 5: White Chibi Robot with Yellow Glowing Eyes & Ears) -->
     <div id="robotBodyVisual" class="is-walking relative w-24 h-28 transition-transform duration-150 flex flex-col items-center">
       
       <svg width="96" height="112" viewBox="0 0 96 112" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <!-- Glossy white head gradient -->
           <linearGradient id="headGrad" x1="15" y1="5" x2="80" y2="65" gradientUnits="userSpaceOnUse">
             <stop stop-color="#ffffff"/>
             <stop offset="0.75" stop-color="#e2e8f0"/>
             <stop offset="1" stop-color="#cbd5e1"/>
           </linearGradient>
-          <!-- Glowing yellow ear ring -->
           <radialGradient id="earGlow" cx="50%" cy="50%" r="50%">
             <stop stop-color="#fef08a"/>
             <stop offset="0.7" stop-color="#f59e0b"/>
             <stop offset="1" stop-color="#b45309"/>
           </radialGradient>
-          <!-- Visor reflection gradient -->
           <linearGradient id="visorGrad" x1="25" y1="20" x2="70" y2="45" gradientUnits="userSpaceOnUse">
             <stop stop-color="#090d16"/>
             <stop offset="1" stop-color="#1e293b"/>
           </linearGradient>
         </defs>
 
-        <!-- LEFT EAR RING (Reference 5 Glowing Ring) -->
+        <!-- LEFT EAR RING -->
         <g id="leftEar">
           <ellipse cx="14" cy="36" rx="4.5" ry="9" fill="#94a3b8" />
           <ellipse cx="13" cy="36" rx="3" ry="7" fill="url(#earGlow)" filter="drop-shadow(0 0 4px #eab308)" />
@@ -320,47 +299,31 @@
           <ellipse cx="83" cy="36" rx="3" ry="7" fill="url(#earGlow)" filter="drop-shadow(0 0 4px #eab308)" />
         </g>
 
-        <!-- ROBOT HEAD & TORSO GROUP -->
+        <!-- HEAD & TORSO -->
         <g class="robot-head-body">
-          <!-- WHITE GLOSSY HEAD DOME -->
           <ellipse cx="48" cy="36" rx="33" ry="29" fill="url(#headGrad)" stroke="#cbd5e1" stroke-width="1.2" filter="drop-shadow(0 6px 10px rgba(0,0,0,0.2))"/>
-          <!-- Head Specular Highlight -->
           <path d="M30 14 C42 10, 58 10, 68 15 C60 12, 38 12, 30 14 Z" fill="#ffffff" opacity="0.8"/>
-
-          <!-- VISOR (Black Glass Screen) -->
           <rect x="23" y="21" width="50" height="30" rx="14" fill="url(#visorGrad)" stroke="#334155" stroke-width="1"/>
-          <!-- Glass reflection line -->
           <path d="M26 27 C34 24, 60 24, 70 27 C58 25, 36 25, 26 27 Z" fill="#ffffff" opacity="0.3"/>
-
-          <!-- EYES (Warm Golden Glowing Spheres like Reference 5) -->
           <circle cx="37" cy="36" r="5.5" fill="#fef08a" filter="drop-shadow(0 0 6px #eab308) drop-shadow(0 0 12px #facc15)"/>
           <circle cx="37" cy="36" r="3" fill="#ffffff"/>
           <circle cx="59" cy="36" r="5.5" fill="#fef08a" filter="drop-shadow(0 0 6px #eab308) drop-shadow(0 0 12px #facc15)"/>
           <circle cx="59" cy="36" r="3" fill="#ffffff"/>
-
-          <!-- NECK JOINT -->
           <rect x="42" y="63" width="12" height="4" rx="2" fill="#334155" />
-
-          <!-- CHUBBY WHITE TORSO -->
           <ellipse cx="48" cy="76" rx="19" ry="14" fill="url(#headGrad)" stroke="#cbd5e1" stroke-width="1" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.15))"/>
-          <!-- Chest Accent Dot (like ref 5 badge) -->
           <circle cx="53" cy="72" r="1.5" fill="#64748b"/>
         </g>
 
         <!-- LEFT ARM -->
         <g class="arm-l" style="transform-origin: 28px 70px;">
-          <!-- Shoulder joint -->
           <circle cx="27" cy="70" r="4.5" fill="#334155"/>
-          <!-- Upper arm & glove -->
           <rect x="23" y="73" width="7" height="12" rx="3.5" fill="url(#headGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
           <ellipse cx="26.5" cy="88" rx="4" ry="4.5" fill="#334155"/>
         </g>
 
         <!-- RIGHT ARM -->
         <g class="arm-r" style="transform-origin: 68px 70px;">
-          <!-- Shoulder joint -->
           <circle cx="69" cy="70" r="4.5" fill="#334155"/>
-          <!-- Upper arm & glove -->
           <rect x="66" y="73" width="7" height="12" rx="3.5" fill="url(#headGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
           <ellipse cx="69.5" cy="88" rx="4" ry="4.5" fill="#334155"/>
         </g>
@@ -368,14 +331,12 @@
         <!-- LEFT LEG -->
         <g class="leg-l" style="transform-origin: 40px 88px;">
           <rect x="36" y="87" width="8" height="14" rx="4" fill="#334155"/>
-          <!-- Glossy White Foot -->
           <ellipse cx="38" cy="103" rx="7.5" ry="4.5" fill="url(#headGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
         </g>
 
         <!-- RIGHT LEG -->
         <g class="leg-r" style="transform-origin: 56px 88px;">
           <rect x="52" y="87" width="8" height="14" rx="4" fill="#334155"/>
-          <!-- Glossy White Foot -->
           <ellipse cx="58" cy="103" rx="7.5" ry="4.5" fill="url(#headGrad)" stroke="#cbd5e1" stroke-width="0.8"/>
         </g>
       </svg>
@@ -384,11 +345,10 @@
 
   </div>
 
-  <!-- ================= AI ASSISTANT MODAL (WITH VOICE & CUSTOM STYLE) ================= -->
+  <!-- ================= AI ASSISTANT MODAL ================= -->
   <div id="aiModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl animate-fadeIn flex flex-col max-h-[90vh]">
       
-      <!-- Modal Header -->
       <div class="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
         <div class="flex items-center gap-2">
           <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-2xl font-bold">
@@ -403,8 +363,6 @@
       </div>
 
       <div class="overflow-y-auto space-y-4 pr-1 flex-1">
-        
-        <!-- Controls: Scenario & Length -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">১. মেসেজের ধরন (Scenario):</label>
@@ -427,23 +385,20 @@
           </div>
         </div>
 
-        <!-- Optional: Train with Custom Style / Persona -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">৩. আপনার পার্সোনাল লেখার স্টাইল / ফরম্যাট (Optional Training):</label>
+            <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">৩. আপনার পার্সোনাল লেখার স্টাইল (Optional Training):</label>
             <button onclick="toggleCustomStyleBox()" class="text-[11px] text-amber-500 hover:underline">Customize Style ▾</button>
           </div>
-          <textarea id="aiCustomStyle" rows="2" placeholder="যেমন: 'আমি সবসময় Hi [Name] দিয়ে শুরু করি এবং শেষে Best regards দিয়ে শেষ করি। কথা খুব স্পষ্ট ও ফ্রেন্ডলি হতে হবে।'"
+          <textarea id="aiCustomStyle" rows="2" placeholder="যেমন: 'আমি সবসময় Hi [Name] দিয়ে শুরু করি এবং শেষে Best regards দিয়ে শেষ করি।'"
             class="hidden w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-2.5 text-xs outline-none focus:border-amber-500 font-mono"></textarea>
         </div>
 
-        <!-- User Prompt / Client Note + Voice Input Button -->
         <div>
           <div class="flex justify-between items-center mb-1.5">
             <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">
               ৪. ক্লায়েন্টের রিকোয়ারমেন্ট বা আপনার কথা (মুখে বলুন বা লিখুন):
             </label>
-            <!-- Voice Input Button -->
             <button type="button" onclick="startVoiceRecognition()" id="micBtn" class="flex items-center gap-1 text-[11px] bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg border border-red-300 dark:border-red-800 font-semibold active:scale-95 transition">
               <span id="micIcon">🎙️</span>
               <span id="micText">Voice Type</span>
@@ -453,7 +408,6 @@
             class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-xs outline-none focus:border-amber-500 resize-none"></textarea>
         </div>
 
-        <!-- AI Output Box -->
         <div id="aiResultBox" class="hidden">
           <div class="flex justify-between items-center mb-1.5">
             <label class="text-xs font-semibold text-amber-600 dark:text-amber-400">AI Generated Safe Message:</label>
@@ -463,7 +417,6 @@
         </div>
       </div>
 
-      <!-- Modal Footer -->
       <div class="flex items-center justify-between pt-4 mt-2 border-t border-gray-100 dark:border-gray-800">
         <span class="text-[11px] text-gray-400">Fiverr Policy Enforced</span>
         <div class="flex items-center gap-2">
@@ -539,7 +492,10 @@
       "review", "feedback", "rating", "specifically", "wire", "direct"
     ];
 
-    let restrictedKeywords = JSON.parse(localStorage.getItem('fiverr_custom_keywords')) || defaultKeywords;
+    // নিশ্চিত করা যেন কী-ওয়ার্ড লিস্ট ফাঁকা না থাকে
+    let savedKeywords = JSON.parse(localStorage.getItem('fiverr_custom_keywords'));
+    let restrictedKeywords = (savedKeywords && savedKeywords.length > 0) ? savedKeywords : [...defaultKeywords];
+
     let previousDraft = "";
 
     let templates = JSON.parse(localStorage.getItem('fiverr_msg_templates')) || [
@@ -593,4 +549,582 @@
         }
       });
 
-      document.getElementById("o
+      document.getElementById("outputText").value = processed;
+      updateMetrics(input, detected);
+    }
+
+    function updateMetrics(text, detected) {
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const chars = text.length;
+
+      document.getElementById("wordCount").innerText = words;
+      document.getElementById("charCount").innerText = chars;
+
+      const detectedDiv = document.getElementById("detectedKeywords");
+      if (detected.length > 0) {
+        detectedDiv.innerHTML = detected.map(w => 
+          `<span class="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 px-2 py-0.5 rounded-lg font-mono font-bold">⚠️ ${w}</span>`
+        ).join('');
+      } else {
+        detectedDiv.innerHTML = `<span class="text-gray-400 italic text-xs">কোনো রেস্ট্রিক্টেড কিওয়ার্ড নেই।</span>`;
+      }
+    }
+
+    // ================= BULLETPROOF AI ROBOT PATROL ENGINE =================
+    const robotWrapper = document.getElementById("robotWrapper");
+    const robotVisual = document.getElementById("robotBodyVisual");
+    const parachute = document.getElementById("robotParachute");
+    const bubble = document.getElementById("robotSpeechBubble");
+    const bubbleText = document.getElementById("speechBubbleText");
+    const bubbleBtns = document.getElementById("speechActionButtons");
+
+    let posX = 40;
+    let direction = 1; // 1 = right, -1 = left
+    const walkSpeed = 1.6;
+    let isHovered = false;
+    let isDragging = false;
+    let isParachuting = false;
+    let isPeeking = false;
+
+    function showBubble(text, showButtons = false) {
+      bubbleText.innerHTML = text;
+      bubbleBtns.style.display = showButtons ? 'flex' : 'none';
+      bubble.style.display = 'flex';
+    }
+
+    function hideBubble() {
+      bubble.style.display = 'none';
+    }
+
+    // Main Patrol Loop
+    function patrolStep() {
+      // যদি ড্র্যাগ, প্যারাস্যুট, হোভার বা লুকোচুরিতে থাকে, হাঁটা পজ হবে
+      if (isDragging || isParachuting || isHovered || isPeeking) {
+        requestAnimationFrame(patrolStep);
+        return;
+      }
+
+      const screenWidth = window.innerWidth;
+      posX += walkSpeed * direction;
+
+      // ডান পাশের দেয়ালে পৌঁছালে লুকোচুরি শুরু
+      if (direction === 1 && posX >= screenWidth - 75) {
+        startPeekRight(screenWidth);
+        requestAnimationFrame(patrolStep);
+        return;
+      }
+
+      // বাম পাশের দেয়ালে পৌঁছালে লুকোচুরি শুরু
+      if (direction === -1 && posX <= 10) {
+        startPeekLeft();
+        requestAnimationFrame(patrolStep);
+        return;
+      }
+
+      // স্বাভাবিক হাঁটা
+      robotWrapper.style.left = posX + "px";
+      robotWrapper.style.bottom = "15px";
+      robotWrapper.style.top = "auto";
+      robotVisual.classList.add("is-walking");
+      robotVisual.style.transform = direction === 1 ? "scaleX(1)" : "scaleX(-1)";
+      hideBubble();
+
+      requestAnimationFrame(patrolStep);
+    }
+
+    // ডান দেয়ালে লুকোচুরি
+    function startPeekRight(screenWidth) {
+      isPeeking = true;
+      robotVisual.classList.remove("is-walking");
+
+      // দেয়ালের আড়ালে যাওয়া
+      robotWrapper.style.left = (screenWidth - 20) + "px";
+
+      setTimeout(() => {
+        if (isDragging) return;
+        // মাথা উঁকি দেওয়া
+        robotWrapper.style.left = (screenWidth - 70) + "px";
+        robotVisual.style.transform = "scaleX(-1)";
+        showBubble("<span>👀</span> Hi, আমাকে খুঁজছো?", false);
+
+        // ২ সেকেন্ড পর ঘুরে উল্টো হাঁটা শুরু
+        setTimeout(() => {
+          if (isDragging) return;
+          hideBubble();
+          direction = -1;
+          posX = screenWidth - 75;
+          robotVisual.style.transform = "scaleX(-1)";
+          robotVisual.classList.add("is-walking");
+          isPeeking = false;
+        }, 2200);
+      }, 400);
+    }
+
+    // বাম দেয়ালে লুকোচুরি
+    function startPeekLeft() {
+      isPeeking = true;
+      robotVisual.classList.remove("is-walking");
+
+      // দেয়ালের আড়ালে যাওয়া
+      robotWrapper.style.left = "-40px";
+
+      setTimeout(() => {
+        if (isDragging) return;
+        // মাথা উঁকি দেওয়া
+        robotWrapper.style.left = "15px";
+        robotVisual.style.transform = "scaleX(1)";
+        showBubble("<span>👀</span> Hi, আমাকে খুঁজছো?", false);
+
+        // ২ সেকেন্ড পর ঘুরে উল্টো হাঁটা শুরু
+        setTimeout(() => {
+          if (isDragging) return;
+          hideBubble();
+          direction = 1;
+          posX = 20;
+          robotVisual.style.transform = "scaleX(1)";
+          robotVisual.classList.add("is-walking");
+          isPeeking = false;
+        }, 2200);
+      }, 400);
+    }
+
+    // মাউস নিলে সামনে তাকাবে এবং জিজ্ঞাসা করবে
+    robotWrapper.addEventListener("mouseenter", () => {
+      if (isDragging || isParachuting || isPeeking) return;
+      isHovered = true;
+      robotVisual.classList.remove("is-walking");
+      robotVisual.style.transform = "scaleX(1)"; // সোজা সামনের দিকে তাকানো
+      showBubble("<span>👋</span> কিছু লাগবে কি?", true);
+    });
+
+    robotWrapper.addEventListener("mouseleave", () => {
+      if (isDragging || isParachuting || isPeeking) return;
+      isHovered = false;
+      hideBubble();
+      robotVisual.classList.add("is-walking");
+      robotVisual.style.transform = direction === 1 ? "scaleX(1)" : "scaleX(-1)";
+    });
+
+    // ================= DRAG & PARACHUTE LOGIC =================
+    let dragStartX, dragStartY, initialLeft, initialTop;
+
+    function onDragStart(clientX, clientY) {
+      if (isParachuting) return;
+      isDragging = true;
+      isPeeking = false;
+      robotVisual.classList.remove("is-walking");
+
+      const rect = robotWrapper.getBoundingClientRect();
+      dragStartX = clientX;
+      dragStartY = clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      robotWrapper.style.bottom = "auto";
+      robotWrapper.style.left = initialLeft + "px";
+      robotWrapper.style.top = initialTop + "px";
+
+      robotWrapper.classList.add("struggling");
+      showBubble("<span>😵</span> আরেহ! ছেড়ে দাও! আমাকে নামাও!", false);
+    }
+
+    function onDragMove(clientX, clientY) {
+      if (!isDragging) return;
+      const deltaX = clientX - dragStartX;
+      const deltaY = clientY - dragStartY;
+
+      let newLeft = initialLeft + deltaX;
+      let newTop = initialTop + deltaY;
+
+      newLeft = Math.max(5, Math.min(window.innerWidth - 100, newLeft));
+      newTop = Math.max(5, Math.min(window.innerHeight - 125, newTop));
+
+      robotWrapper.style.left = newLeft + "px";
+      robotWrapper.style.top = newTop + "px";
+      posX = newLeft;
+    }
+
+    function onDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      robotWrapper.classList.remove("struggling");
+
+      const rect = robotWrapper.getBoundingClientRect();
+      const groundTop = window.innerHeight - 135;
+
+      // উপরে ছাড়লে প্যারাস্যুট খুলবে
+      if (rect.top < groundTop - 45) {
+        startParachuteDescent();
+      } else {
+        // ফ্লোরে থাকলে নরমাল রিসেট
+        robotWrapper.style.top = "auto";
+        robotWrapper.style.bottom = "15px";
+        hideBubble();
+      }
+    }
+
+    function startParachuteDescent() {
+      isParachuting = true;
+      parachute.style.display = 'block';
+      robotWrapper.classList.add("parachuting");
+      showBubble("<span>🪂</span> প্যারাস্যুট দিয়ে নামছি...", false);
+
+      function floatDown() {
+        if (!isParachuting) return;
+        let currentTop = parseFloat(robotWrapper.style.top) || 0;
+        const groundTop = window.innerHeight - 135;
+
+        if (currentTop < groundTop) {
+          currentTop += 2.5;
+          robotWrapper.style.top = currentTop + "px";
+          requestAnimationFrame(floatDown);
+        } else {
+          isParachuting = false;
+          parachute.style.display = 'none';
+          robotWrapper.classList.remove("parachuting");
+          robotWrapper.style.top = "auto";
+          robotWrapper.style.bottom = "15px";
+          showBubble("<span>🎉</span> সেফ ল্যান্ডিং করেছি!", false);
+          setTimeout(() => { hideBubble(); }, 2500);
+        }
+      }
+      requestAnimationFrame(floatDown);
+    }
+
+    robotWrapper.addEventListener("mousedown", (e) => {
+      if (e.target.closest("#robotSpeechBubble")) return;
+      onDragStart(e.clientX, e.clientY);
+    });
+    window.addEventListener("mousemove", (e) => onDragMove(e.clientX, e.clientY));
+    window.addEventListener("mouseup", onDragEnd);
+
+    robotWrapper.addEventListener("touchstart", (e) => {
+      if (e.target.closest("#robotSpeechBubble")) return;
+      onDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      onDragMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener("touchend", onDragEnd);
+
+    function acceptRobotHelp(e) {
+      if (e) e.stopPropagation();
+      openAiAgentModal();
+    }
+
+    function dismissRobotBubble(e) {
+      if (e) e.stopPropagation();
+      hideBubble();
+    }
+
+    function toggleCustomStyleBox() {
+      document.getElementById("aiCustomStyle").classList.toggle("hidden");
+    }
+
+    // ================= VOICE TYPING (WEB SPEECH API) =================
+    let recognition = null;
+    function startVoiceRecognition() {
+      const micBtn = document.getElementById("micBtn");
+      const micText = document.getElementById("micText");
+
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("আপনার ব্রাউজারে ভয়েস টাইপিং সাপোর্ট করে না। Google Chrome ব্যবহার করুন।");
+        return;
+      }
+
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!recognition) {
+        recognition = new SpeechRec();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'bn-BD';
+
+        recognition.onstart = () => {
+          micText.innerText = "Listening...";
+          micBtn.classList.add("animate-pulse", "bg-red-500", "text-white");
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          const notes = document.getElementById("aiClientNotes");
+          notes.value = (notes.value ? notes.value + " " : "") + transcript;
+        };
+
+        recognition.onerror = () => {
+          micText.innerText = "Voice Type";
+          micBtn.classList.remove("animate-pulse", "bg-red-500", "text-white");
+        };
+
+        recognition.onend = () => {
+          micText.innerText = "Voice Type";
+          micBtn.classList.remove("animate-pulse", "bg-red-500", "text-white");
+        };
+      }
+
+      try {
+        recognition.start();
+      } catch (err) {
+        recognition.stop();
+      }
+    }
+
+    // ================= AI ASSISTANT (GOOGLE GEMINI) =================
+    function openAiAgentModal() {
+      const apiKey = localStorage.getItem('gemini_user_api_key');
+      if (!apiKey) {
+        openApiKeyModal();
+        return;
+      }
+      document.getElementById("aiModal").classList.remove("hidden");
+    }
+
+    function closeAiModal() {
+      document.getElementById("aiModal").classList.add("hidden");
+    }
+
+    function openApiKeyModal() {
+      document.getElementById("geminiApiKeyInput").value = localStorage.getItem('gemini_user_api_key') || "";
+      document.getElementById("apiKeyModal").classList.remove("hidden");
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById("apiKeyModal").classList.add("hidden");
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById("geminiApiKeyInput").value.trim();
+      if (!key) return alert("দয়া করে সঠিক API Key দিন!");
+      localStorage.setItem('gemini_user_api_key', key);
+      updateApiKeyStatus();
+      closeApiKeyModal();
+      alert("✅ API Key সফলভাবে সেভ হয়েছে! এবার AI Assistant ব্যবহার করুন।");
+    }
+
+    function updateApiKeyStatus() {
+      const key = localStorage.getItem('gemini_user_api_key');
+      document.getElementById("apiKeyStatusText").innerText = key ? "AI Key Active ✓" : "Set AI Key";
+    }
+
+    async function generateFiverrMessageWithAI() {
+      const apiKey = localStorage.getItem('gemini_user_api_key');
+      if (!apiKey) {
+        openApiKeyModal();
+        return;
+      }
+
+      const notes = document.getElementById("aiClientNotes").value.trim();
+      const scenario = document.getElementById("aiScenario").value;
+      const lengthPreference = document.getElementById("aiLength").value;
+      const customStyle = document.getElementById("aiCustomStyle").value.trim();
+      const btn = document.getElementById("aiGenBtnText");
+
+      if (!notes) {
+        alert("অনুগ্রহ করে আপনি ক্লায়েন্টকে কী বলতে চান তা লিখুন বা ভয়েসে বলুন!");
+        return;
+      }
+
+      btn.innerText = "Generating...";
+
+      let lengthConstraint = "";
+      if (lengthPreference === 'short_400') {
+        lengthConstraint = "STRICT CONSTRAINT: Keep the entire message very concise, direct, and STRICTLY UNDER 400 CHARACTERS total (optimal for quick revisions).";
+      } else if (lengthPreference === 'detailed') {
+        lengthConstraint = "CONSTRAINT: Write a detailed, reassuring response addressing every single point with clear bullet points where appropriate.";
+      } else {
+        lengthConstraint = "CONSTRAINT: Balanced length, natural and professional.";
+      }
+
+      const systemPrompt = `You are an elite, top-rated Fiverr Freelance Communication Specialist.
+Write a highly professional, polite, and native-sounding English message to a Fiverr client.
+
+CRITICAL FIVERR TOS RULES:
+1. NEVER mention or suggest contact outside Fiverr (No email, phone, WhatsApp, Skype, Telegram, Zoom, etc.).
+2. NEVER ask for 5-star ratings or positive reviews directly.
+3. NEVER discuss outside payments.
+4. Keep the tone friendly, reassuring, professional, and clear.
+
+${lengthConstraint}
+${customStyle ? "USER'S PERSONAL WRITING STYLE / INSTRUCTIONS: " + customStyle : ""}
+
+Scenario: ${scenario}
+Freelancer's Raw Thoughts / Client Requirements: "${notes}"
+
+Output ONLY the exact final ready-to-send message text. Do not add any conversational intro like "Here is your message:".`;
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey 
+          },
+          body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
+        });
+
+        const data = await res.json();
+        const generated = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (generated) {
+          const trimmed = generated.trim();
+          document.getElementById("aiGeneratedText").value = trimmed;
+          document.getElementById("aiResultCharCount").innerText = `${trimmed.length} characters`;
+          document.getElementById("aiResultBox").classList.remove("hidden");
+          document.getElementById("aiApplyBtn").classList.remove("hidden");
+        } else {
+          alert("মেসেজ তৈরিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+        }
+      } catch (err) {
+        console.error("AI Generation Error:", err);
+        alert("নেটওয়ার্ক সমস্যা অথবা API Key ভুল। আবার চেষ্টা করুন।");
+      } finally {
+        btn.innerText = "Generate Message";
+      }
+    }
+
+    function applyAiTextToMainInput() {
+      const text = document.getElementById("aiGeneratedText").value;
+      if (text) {
+        previousDraft = document.getElementById("inputText").value;
+        document.getElementById("inputText").value = text;
+        processText();
+        closeAiModal();
+
+        const statusBox = document.getElementById("statusAlert");
+        document.getElementById("statusAlertText").innerText = "✨ AI দিয়ে তৈরি মেসেজ ইনপুট বক্সে সেট করা হয়েছে!";
+        statusBox.classList.remove("hidden");
+        setTimeout(() => { statusBox.classList.add("hidden"); }, 6000);
+      }
+    }
+
+    // ================= GOOGLE TRANSLATE ENGINE =================
+    async function translateAndPolishWithGoogle() {
+      const inputEl = document.getElementById("inputText");
+      const text = inputEl.value.trim();
+      const btnText = document.getElementById("googleBtnText");
+
+      if (!text) {
+        alert("অনুগ্রহ করে ইনপুট বক্সে কিছু লিখুন!");
+        return;
+      }
+
+      previousDraft = inputEl.value;
+      btnText.innerText = "Polishing...";
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data[0]) {
+          const polished = data[0].map(item => item[0]).join('');
+          inputEl.value = polished;
+          processText();
+
+          const statusBox = document.getElementById("statusAlert");
+          document.getElementById("statusAlertText").innerText = "🌐 গুগল ট্রান্সলেটর দিয়ে নিখুঁত ইংরেজিতে রূপান্তর করা হয়েছে।";
+          statusBox.classList.remove("hidden");
+          setTimeout(() => { statusBox.classList.add("hidden"); }, 6000);
+        }
+      } catch (err) {
+        console.error("Google Translation Error:", err);
+      } finally {
+        btnText.innerText = "Translate & Polish";
+      }
+    }
+
+    function undoTextChange() {
+      if (previousDraft) {
+        document.getElementById("inputText").value = previousDraft;
+        processText();
+        document.getElementById("statusAlert").classList.add("hidden");
+      }
+    }
+
+    function clearInput() {
+      document.getElementById("inputText").value = "";
+      processText();
+      document.getElementById("statusAlert").classList.add("hidden");
+    }
+
+    // ================= KEYWORDS MANAGEMENT =================
+    function openKeywordModal() {
+      renderKeywordTags();
+      document.getElementById("keywordModal").classList.remove("hidden");
+    }
+
+    function closeKeywordModal() {
+      document.getElementById("keywordModal").classList.add("hidden");
+      processText();
+    }
+
+    function renderKeywordTags() {
+      const container = document.getElementById("keywordTagContainer");
+      document.getElementById("keywordCount").innerText = restrictedKeywords.length;
+      container.innerHTML = "";
+
+      restrictedKeywords.forEach((word, index) => {
+        const tag = document.createElement("span");
+        tag.className = "bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 px-2.5 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5";
+        tag.innerHTML = `
+          <span>${word}</span>
+          <button onclick="removeKeyword(${index})" class="text-rose-500 hover:text-rose-600 font-bold ml-1">✕</button>
+        `;
+        container.appendChild(tag);
+      });
+    }
+
+    function addKeyword() {
+      const input = document.getElementById("newKeywordInput");
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+
+      if (!restrictedKeywords.includes(val)) {
+        restrictedKeywords.push(val);
+        localStorage.setItem('fiverr_custom_keywords', JSON.stringify(restrictedKeywords));
+        input.value = "";
+        renderKeywordTags();
+      } else {
+        alert("এই কিওয়ার্ডটি ইতোমধ্যে রয়েছে!");
+      }
+    }
+
+    function removeKeyword(index) {
+      restrictedKeywords.splice(index, 1);
+      localStorage.setItem('fiverr_custom_keywords', JSON.stringify(restrictedKeywords));
+      renderKeywordTags();
+    }
+
+    function resetKeywordsToDefault() {
+      if (confirm("সব কিওয়ার্ড ডিফল্ট অবস্থায় ফিরিয়ে নিতে চান?")) {
+        restrictedKeywords = [...defaultKeywords];
+        localStorage.setItem('fiverr_custom_keywords', JSON.stringify(restrictedKeywords));
+        renderKeywordTags();
+      }
+    }
+
+    // ================= TEMPLATE MANAGEMENT =================
+    function renderTemplates() {
+      const search = document.getElementById("templateSearch").value.toLowerCase();
+      const list = document.getElementById("templateList");
+      list.innerHTML = "";
+
+      const filtered = templates.filter(t => t.title.toLowerCase().includes(search) || t.content.toLowerCase().includes(search));
+      document.getElementById("templateBadge").innerText = filtered.length;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<span class="text-xs text-gray-400 italic block text-center py-4">কোনো টেমপ্লেট নেই।</span>`;
+        return;
+      }
+
+      filtered.forEach(t => {
+        const item = document.createElement("div");
+        item.className = "bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-cyan-500/70 p-3 rounded-xl cursor-pointer transition group";
+        item.innerHTML = `
+          <div class="flex justify-between items-start mb-1">
+            <h4 class="font-bold text-xs text-cyan-700 dark:text-cyan-400 truncate w-36">${t.title}</h4>
+            <button onclick="event.stopPropagation(); deleteTemplate(${t.id})" class="text-gray-400 hover:text-red-500 text-xs" title="Delete">🗑️</button>
+          </div>
+          <p class="text-gray-500 dark:
