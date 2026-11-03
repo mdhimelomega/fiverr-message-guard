@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiverr Message & Google Safe Guard</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            fiverr: '#1dbf73',
+            'fiverr-hover': '#19a463',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    .dark ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+  </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-[#070b13] text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ================= TOP NAVBAR ================= -->
+  <header class="w-full bg-white dark:bg-[#0d1424] border-b border-gray-200 dark:border-gray-800 px-4 lg:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+    <div class="flex items-center gap-3">
+      <!-- Fiverr Logo -->
+      <div class="flex items-center font-black text-2xl tracking-tighter">
+        <span class="text-gray-900 dark:text-white text-3xl font-extrabold tracking-tight">fiverr<span class="text-fiverr text-4xl leading-none">.</span></span>
+      </div>
+      <div class="h-6 w-[2px] bg-gray-300 dark:bg-gray-700 hidden sm:block"></div>
+      <span class="text-sm sm:text-base font-semibold text-cyan-600 dark:text-cyan-400 hidden sm:block">
+        Google Powered Message & Safety Guard
+      </span>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Keywords Settings -->
+      <button onclick="openKeywordModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs sm:text-sm font-medium hover:border-amber-500 transition">
+        <span>⚙️</span>
+        <span class="hidden sm:inline">Keywords (<span id="keywordCount">0</span>)</span>
+      </button>
+
+      <!-- Day/Night Toggle -->
+      <button onclick="toggleTheme()" id="themeBtn" title="Theme Toggle" 
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs sm:text-sm font-medium hover:border-cyan-500 transition">
+        <span id="themeIcon">☀️</span>
+        <span id="themeText" class="hidden sm:inline">Light Mode</span>
+      </button>
+
+      <!-- Copy Button -->
+      <button onclick="copyOutput()" class="bg-fiverr hover:bg-fiverr-hover text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-md shadow-fiverr/20 transition active:scale-95">
+        <span>📋</span>
+        <span>Copy Safe Text</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN FULL-SCREEN DASHBOARD ================= -->
+  <main class="w-full flex-1 p-3 sm:p-5 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+    <!-- ====== SIDEBAR: TEMPLATES (Col 12 -> 3 on Desktop) ====== -->
+    <aside class="lg:col-span-3 w-full bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 flex flex-col h-[520px] lg:h-[calc(100vh-115px)] shadow-sm">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-cyan-600 dark:text-cyan-400 font-bold text-base">Templates</span>
+          <span id="templateBadge" class="bg-cyan-100 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 text-[11px] font-bold px-2 py-0.5 rounded-full">0</span>
+        </div>
+        <button onclick="openNewTemplateModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+          <span>+</span> New
+        </button>
+      </div>
+
+      <!-- Search bar -->
+      <div class="relative mb-3">
+        <input type="text" id="templateSearch" oninput="renderTemplates()" placeholder="Search templates..."
+          class="w-full bg-gray-50 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 text-xs outline-none focus:border-cyan-500 dark:focus:border-cyan-400 transition text-gray-700 dark:text-gray-200 placeholder-gray-400">
+      </div>
+
+      <!-- Templates scroll area -->
+      <div id="templateList" class="flex-1 overflow-y-auto space-y-2.5 pr-1"></div>
+    </aside>
+
+    <!-- ====== MAIN CENTER CONTENT (Col 12 -> 9 on Desktop) ====== -->
+    <section class="lg:col-span-9 w-full flex flex-col gap-4">
+
+      <!-- Action Mode Bar & Google Translate Controller -->
+      <div class="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+        
+        <!-- Action Mode: Resolve vs Remove -->
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">Keyword Action:</span>
+          
+          <label class="flex items-center gap-2 cursor-pointer bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3 py-1.5 rounded-xl hover:border-cyan-500 transition">
+            <input type="radio" name="actionMode" value="resolve" checked onchange="processText()" class="accent-cyan-500">
+            <span class="text-xs sm:text-sm font-medium text-cyan-600 dark:text-cyan-400">Resolve (c-a-l-l)</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3 py-1.5 rounded-xl hover:border-red-500 transition">
+            <input type="radio" name="actionMode" value="remove" onchange="processText()" class="accent-red-500">
+            <span class="text-xs sm:text-sm font-medium text-red-500 dark:text-red-400">Remove Keyword</span>
+          </label>
+        </div>
+
+        <!-- Google Translate & Polish Actions -->
+        <div class="flex items-center gap-2">
+          <!-- Direct Google Translate Polish Button -->
+          <button onclick="translateAndPolishWithGoogle()" id="googleBtn" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span>🌐</span>
+            <span id="googleBtnText">Google Translate & Polish</span>
+          </button>
+
+          <button onclick="saveCurrentAsTemplate()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span>💾</span>
+            <span>Save Template</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Google Translation Status Notification -->
+      <div id="googleStatus" class="hidden bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 rounded-xl p-2.5 text-blue-700 dark:text-blue-300 text-xs flex items-center justify-between animate-fadeIn">
+        <span id="googleStatusText">গুগল ট্রান্সলেটর দিয়ে বাক্যটি প্রফেশনাল ইংরেজিতে রূপান্তর করা হয়েছে।</span>
+        <button onclick="undoGooglePolish()" class="text-blue-500 underline text-xs font-semibold">Undo</button>
+      </div>
+
+      <!-- Dual Textarea Box (Input vs Output) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Input Textarea -->
+        <div class="flex flex-col bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs sm:text-sm font-bold text-cyan-600 dark:text-cyan-400">Input Message (বাংলা বা ইংরেজি লিখুন)</span>
+            <button onclick="clearInput()" class="text-[11px] text-gray-400 hover:text-red-500 transition">Clear</button>
+          </div>
+          <textarea id="inputText" oninput="processText()" placeholder="এখানে আপনার মেসেজ লিখুন (বাংলায় লিখলেও চলবে, উপরে 'Google Translate' চাপলে পারফেক্ট ইংরেজি হয়ে যাবে)..."
+            class="w-full h-80 sm:h-96 bg-gray-50 dark:bg-[#070b13] border border-gray-200 dark:border-gray-800 rounded-xl p-3.5 text-sm outline-none focus:border-cyan-500 dark:focus:border-cyan-400 transition font-mono leading-relaxed resize-none"></textarea>
+        </div>
+
+        <!-- Output Textarea -->
+        <div class="flex flex-col bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">Safe Output Message (Fiverr Ready)</span>
+            <span class="text-[11px] text-gray-400">Auto Filtered</span>
+          </div>
+          <textarea id="outputText" readonly placeholder="ফিল্টার করা নিরাপদ ও শুদ্ধ মেসেজ এখানে আসবে..."
+            class="w-full h-80 sm:h-96 bg-gray-50 dark:bg-[#070b13] border border-gray-200 dark:border-gray-800 rounded-xl p-3.5 text-sm text-emerald-700 dark:text-emerald-400 font-mono leading-relaxed outline-none resize-none"></textarea>
+        </div>
+      </div>
+
+      <!-- Metrics and Warning Badges -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Stats -->
+        <div class="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 p-4 rounded-2xl flex items-center justify-around shadow-sm">
+          <div class="text-center">
+            <span class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Words</span>
+            <div id="wordCount" class="text-2xl font-black text-cyan-600 dark:text-cyan-400">0</div>
+          </div>
+          <div class="h-8 w-px bg-gray-200 dark:bg-gray-800"></div>
+          <div class="text-center">
+            <span class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Characters</span>
+            <div id="charCount" class="text-2xl font-black text-cyan-600 dark:text-cyan-400">0</div>
+          </div>
+        </div>
+
+        <!-- Detected Restricted Keywords -->
+        <div class="sm:col-span-2 bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 p-4 rounded-2xl shadow-sm flex flex-col justify-center">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Restricted Warnings Found:</span>
+            <button onclick="openKeywordModal()" class="text-[11px] text-cyan-500 hover:underline">+ Add / Edit Keywords</button>
+          </div>
+          <div id="detectedKeywords" class="flex flex-wrap gap-2 text-xs">
+            <span class="text-gray-400 italic text-xs">কোনো রেস্ট্রিক্টেড কিওয়ার্ড নেই।</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ================= KEYWORD MANAGER MODAL ================= -->
+  <div id="keywordModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-lg p-5 shadow-2xl animate-fadeIn">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <span>⚙️</span> Manage Restricted Keywords
+        </h3>
+        <button onclick="closeKeywordModal()" class="text-gray-400 hover:text-red-500 text-lg">✕</button>
+      </div>
+
+      <!-- Add New Keyword -->
+      <div class="flex gap-2 mb-4">
+        <input type="text" id="newKeywordInput" placeholder="নতুন কী-ওয়ার্ড (যেমন: skype, pay, call)"
+          class="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-cyan-500"
+          onkeydown="if(event.key==='Enter') addKeyword()">
+        <button onclick="addKeyword()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+          + Add
+        </button>
+      </div>
+
+      <!-- List of Keywords -->
+      <div class="max-h-60 overflow-y-auto border border-gray-100 dark:border-gray-800/80 rounded-xl p-3 flex flex-wrap gap-2" id="keywordTagContainer"></div>
+
+      <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+        <button onclick="resetKeywordsToDefault()" class="text-xs text-rose-500 hover:underline">Reset to Default</button>
+        <button onclick="closeKeywordModal()" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-xs px-4 py-2 rounded-lg font-semibold transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SCRIPT LOGIC ================= -->
+  <script>
+    const defaultKeywords = [
+      "call", "email", "mail", "whatsapp", "skype", "phone", "number", 
+      "contact", "pay", "payment", "outside", "telegram", "zoom", 
+      "review", "feedback", "rating", "specifically", "wire", "direct"
+    ];
+
+    let restrictedKeywords = JSON.parse(localStorage.getItem('fiverr_custom_keywords')) || defaultKeywords;
+    let previousDraftBeforeGoogle = "";
+
+    let templates = JSON.parse(localStorage.getItem('fiverr_msg_templates')) || [
+      {
+        id: 1,
+        title: "Update Msg - Design",
+        content: "Hi there, I have updated the requested files. Please review and let me know if any modifications are needed."
+      }
+    ];
+
+    // ================= থিম নিয়ন্ত্রণ =================
+    function initTheme() {
+      const savedTheme = localStorage.getItem('app_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+      updateThemeUI();
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
+      updateThemeUI();
+    }
+
+    function updateThemeUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+      document.getElementById('themeText').innerText = isDark ? 'Light Mode' : 'Dark Mode';
+    }
+
+    // ================= ইনপুট ও রেস্ট্রিক্টেড কিওয়ার্ড ফিল্টারিং =================
+    function processText() {
+      const input = document.getElementById("inputText").value;
+      const mode = document.querySelector('input[name="actionMode"]:checked').value;
+      
+      let processed = input;
+      let detected = [];
+
+      restrictedKeywords.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        if (regex.test(input)) {
+          detected.push(keyword);
+          if (mode === 'remove') {
+            processed = processed.replace(regex, "");
+          } else if (mode === 'resolve') {
+            processed = processed.replace(regex, match => match.split('').join('-'));
+          }
+        }
+      });
+
+      document.getElementById("outputText").value = processed;
+      updateMetrics(input, detected);
+    }
+
+    function updateMetrics(text, detected) {
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const chars = text.length;
+
+      document.getElementById("wordCount").innerText = words;
+      document.getElementById("charCount").innerText = chars;
+
+      const detectedDiv = document.getElementById("detectedKeywords");
+      if (detected.length > 0) {
+        detectedDiv.innerHTML = detected.map(w => 
+          `<span class="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 px-2 py-0.5 rounded-lg font-mono font-bold">⚠️ ${w}</span>`
+        ).join('');
+      } else {
+        detectedDiv.innerHTML = `<span class="text-gray-400 italic text-xs">কোনো রেস্ট্রিক্টেড কিওয়ার্ড নেই।</span>`;
+      }
+    }
+
+    // ================= GOOGLE TRANSLATOR & GRAMMAR ENGINE =================
+    async function translateAndPolishWithGoogle() {
+      const inputEl = document.getElementById("inputText");
+      const text = inputEl.value.trim();
+      const btnText = document.getElementById("googleBtnText");
+
+      if (!text) {
+        alert("অনুগ্রহ করে আগে ইনপুট বক্সে মেসেজ লিখুন!");
+        return;
+      }
+
+      previousDraftBeforeGoogle = inputEl.value; // Undo এর জন্য ব্যাকআপ
+      btnText.innerText = "Polishing with Google...";
+
+      try {
+        // Google Translate Engine API (CORS Free & Instant)
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data[0]) {
+          // Google ট্রান্সলেশনের অংশগুলো সুন্দরভাবে সাজিয়ে ফুল বাক্য তৈরি
+          const polishedEnglish = data[0].map(item => item[0]).join('');
+          
+          inputEl.value = polishedEnglish;
+          processText(); // সাথে সাথে ফাইভারে সেফ ফিল্টার চালানো
+
+          // স্ট্যাটাস দেখানো
+          const statusBox = document.getElementById("googleStatus");
+          statusBox.classList.remove("hidden");
+          setTimeout(() => { statusBox.classList.add("hidden"); }, 8000);
+        }
+      } catch (err) {
+        console.error("Google Translation Error:", err);
+        alert("গুগল ট্রান্সলেশনে সমস্যা হচ্ছে, ইন্টারনেট কানেকশন চেক করুন।");
+      } finally {
+        btnText.innerText = "Google Translate & Polish";
+      }
+    }
+
+    function undoGooglePolish() {
+      if (previousDraftBeforeGoogle) {
+        document.getElementById("inputText").value = previousDraftBeforeGoogle;
+        processText();
+        document.getElementById("googleStatus").classList.add("hidden");
+      }
+    }
+
+    function clearInput() {
+      document.getElementById("inputText").value = "";
+      processText();
+      document.getElementById("googleStatus").classList.add("hidden");
+    }
+
+    // ================= KEYWORDS MANAGEMENT =================
+    function openKeywordModal() {
+      renderKeywordTags();
+      document.getElementById("keywordModal").classList.remove("hidden");
+    }
+
+    function closeKeywordModal() {
+      document.getElementById("keywordModal").classList.add("hidden");
+      processText();
+    }
+
+    function renderKeywordTags() {
+      const container = document.getElementById("keywordTagContainer");
+      document.getElementById("keywordCount").innerText = restrictedKeywords.length;
+      container.innerHTML = "";
+
+      restrictedKeywords.forEach((word, index) => {
+        const tag = document.createElement("span");
+        tag.className = "bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 px-2.5 py-1 rounded-lg text-xs font-mono flex items-center gap-1.5";
+        tag.innerHTML = `
+          <span>${word}</span>
+          <button onclick="removeKeyword(${index})" class="text-rose-500 hover:text-rose-600 font-bold ml-1">✕</button>
+        `;
+        container.appendChild(tag);
+      });
+    }
+
+    function addKeyword() {
+      const input = document.getElementById("newKeywordInput");
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+
+      if (!restrictedKeywords.includes(val)) {
+        restrictedKeywords.push(val);
+        localStorage.setItem('fiverr_custom_keywords', JSON.stringify(restrictedKeywords));
+        input.value = "";
+        renderKeywordTags();
+      } else {
+        alert("এই কিওয়ার্ডটি ইতোমধ্যে রয়েছে!");
+      }
+    }
+
+    function removeKeyword(index) {
+      restrictedKeywords.splice(index, 1);
+      localStorage.setItem('fiverr_custom_keywords', JSON.stringify(restrictedKeywords));
+      renderKeywordTags();
+    }
+
+    function resetKeywordsToDefault() {
+      if (confirm("সব কিওয়ার্ড ডিফল্ট অবস্থায় ফিরিয়ে নিতে চান?")) {
+        restrictedKeywords = [...defaultKeywords];
+        localStorage.setItem('fiverr_custom_keywords', JSON.stringify(restrictedKeywords));
+        renderKeywordTags();
+      }
+    }
+
+    // ================= TEMPLATE MANAGEMENT =================
+    function renderTemplates() {
+      const search = document.getElementById("templateSearch").value.toLowerCase();
+      const list = document.getElementById("templateList");
+      list.innerHTML = "";
+
+      const filtered = templates.filter(t => t.title.toLowerCase().includes(search) || t.content.toLowerCase().includes(search));
+      document.getElementById("templateBadge").innerText = filtered.length;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<span class="text-xs text-gray-400 italic block text-center py-4">কোনো টেমপ্লেট নেই।</span>`;
+        return;
+      }
+
+      filtered.forEach(t => {
+        const item = document.createElement("div");
+        item.className = "bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-cyan-500/70 p-3 rounded-xl cursor-pointer transition group";
+        item.innerHTML = `
+          <div class="flex justify-between items-start mb-1">
+            <h4 class="font-bold text-xs text-cyan-700 dark:text-cyan-400 truncate w-36">${t.title}</h4>
+            <button onclick="event.stopPropagation(); deleteTemplate(${t.id})" class="text-gray-400 hover:text-red-500 text-xs" title="Delete">🗑️</button>
+          </div>
+          <p class="text-gray-500 dark:text-gray-400 text-[11px] line-clamp-2">${t.content}</p>
+        `;
+        item.onclick = () => {
+          document.getElementById("inputText").value = t.content;
+          processText();
+        };
+        list.appendChild(item);
+      });
+    }
+
+    function openNewTemplateModal() {
+      const title = prompt("টেমপ্লেটের নাম দিন:");
+      if (!title) return;
+      const content = prompt("টেমপ্লেটের মেসেজ লিখুন:");
+      if (content) {
+        templates.unshift({ id: Date.now(), title, content });
+        saveAndReloadTemplates();
+      }
+    }
+
+    function saveCurrentAsTemplate() {
+      const content = document.getElementById("inputText").value;
+      if (!content.trim()) return alert("ইনপুট বক্সে মেসেজ লিখুন!");
+      const title = prompt("এই টেমপ্লেটের নাম দিন:");
+      if (title) {
+        templates.unshift({ id: Date.now(), title, content });
+        saveAndReloadTemplates();
+      }
+    }
+
+    function deleteTemplate(id) {
+      if (confirm("টেমপ্লেটটি মুছে ফেলতে চান?")) {
+        templates = templates.filter(t => t.id !== id);
+        saveAndReloadTemplates();
+      }
+    }
+
+    function saveAndReloadTemplates() {
+      localStorage.setItem('fiverr_msg_templates', JSON.stringify(templates));
+      renderTemplates();
+    }
+
+    // ================= COPY FUNCTION =================
+    function copyOutput() {
+      const out = document.getElementById("outputText");
+      if (!out.value.trim()) {
+        alert("কপি করার মতো কোনো মেসেজ নেই!");
+        return;
+      }
+      navigator.clipboard.writeText(out.value);
+      alert("✅ নিরাপদ মেসেজটি ক্লিপবোর্ডে কপি করা হয়েছে!");
+    }
+
+    // ইনিশিয়ালাইজ
+    window.onload = () => {
+      initTheme();
+      renderTemplates();
+      processText();
+      document.getElementById("keywordCount").innerText = restrictedKeywords.length;
+    };
+  </script>
+</body>
+</html>
