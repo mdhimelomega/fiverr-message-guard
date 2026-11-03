@@ -28,14 +28,38 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+    .animate-fadeIn { animation: fadeIn 0.25s ease-out forwards; }
+
+    /* Walking Robot Keyframe Animations */
+    @keyframes robotPatrol {
+      0% { left: 5%; transform: scaleX(1); }
+      48% { left: 85%; transform: scaleX(1); }
+      50% { left: 85%; transform: scaleX(-1); }
+      98% { left: 5%; transform: scaleX(-1); }
+      100% { left: 5%; transform: scaleX(1); }
+    }
+
+    @keyframes robotBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .walking-robot {
+      animation: robotPatrol 30s ease-in-out infinite;
+    }
+    .walking-robot:hover {
+      animation-play-state: paused;
+    }
+    .robot-bounce {
+      animation: robotBob 1.2s ease-in-out infinite;
+    }
   </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-[#070b13] text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-gray-100 dark:bg-[#070b13] text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200 overflow-x-hidden relative">
 
   <!-- ================= TOP NAVBAR ================= -->
   <header class="w-full bg-white dark:bg-[#0d1424] border-b border-gray-200 dark:border-gray-800 px-4 lg:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40 shadow-sm">
@@ -52,10 +76,10 @@
 
     <!-- Right Controls -->
     <div class="flex items-center gap-2.5">
-      <!-- AI Settings (API Key) -->
-      <button onclick="openApiKeyModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs sm:text-sm font-semibold hover:border-purple-500 transition">
-        <span>🔑</span>
-        <span id="apiKeyStatusText">Set AI Key</span>
+      <!-- AI Status Badge -->
+      <button onclick="openApiKeyModal()" id="apiKeyBadge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs sm:text-sm font-semibold hover:border-purple-500 transition">
+        <span>🤖</span>
+        <span id="apiKeyStatusText">AI Key Active ✓</span>
       </button>
 
       <!-- Keywords Settings -->
@@ -80,10 +104,10 @@
   </header>
 
   <!-- ================= MAIN FULL-SCREEN DASHBOARD ================= -->
-  <main class="w-full flex-1 p-3 sm:p-5 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+  <main class="w-full flex-1 p-3 sm:p-5 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start pb-28">
 
     <!-- ====== SIDEBAR: TEMPLATES (Col 12 -> 3 on Desktop) ====== -->
-    <aside class="lg:col-span-3 w-full bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 flex flex-col h-[520px] lg:h-[calc(100vh-115px)] shadow-sm">
+    <aside class="lg:col-span-3 w-full bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 flex flex-col h-[520px] lg:h-[calc(100vh-140px)] shadow-sm">
       <div class="flex justify-between items-center mb-3">
         <div class="flex items-center gap-2">
           <span class="text-cyan-600 dark:text-cyan-400 font-bold text-base">Templates</span>
@@ -107,7 +131,7 @@
     <!-- ====== MAIN CENTER CONTENT (Col 12 -> 9 on Desktop) ====== -->
     <section class="lg:col-span-9 w-full flex flex-col gap-4">
 
-      <!-- Action Mode Bar & AI Assistant Launchers -->
+      <!-- Action Mode Bar & Google Translate Launcher -->
       <div class="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
         
         <!-- Action Mode: Resolve vs Remove -->
@@ -127,10 +151,10 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center flex-wrap gap-2">
-          <!-- AI Assistant Modal Trigger -->
-          <button onclick="openAiAgentModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-purple-500/20 active:scale-95">
-            <span>🤖</span>
-            <span>AI Smart Draft</span>
+          <!-- Quick summon assistant button -->
+          <button onclick="openAiAgentModal()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95">
+            <span>✨</span>
+            <span>AI Assistant</span>
           </button>
 
           <!-- Google Translate Polish -->
@@ -162,7 +186,7 @@
             <span class="text-xs sm:text-sm font-bold text-cyan-600 dark:text-cyan-400">Input Message (Client Draft)</span>
             <button onclick="clearInput()" class="text-[11px] text-gray-400 hover:text-red-500 transition">Clear</button>
           </div>
-          <textarea id="inputText" oninput="processText()" placeholder="আপনার ক্লায়েন্টের মেসেজ এখানে লিখুন (অথবা 'AI Smart Draft' বাটনে চাপ দিয়ে ড্রাফট বানিয়ে নিন)..."
+          <textarea id="inputText" oninput="processText()" placeholder="আপনার ক্লায়েন্টের মেসেজ এখানে লিখুন (নিচের হাঁটতে থাকা রোবটটিকে ক্লিক করে সহায়তা নিতে পারেন)..."
             class="w-full h-80 sm:h-96 bg-gray-50 dark:bg-[#070b13] border border-gray-200 dark:border-gray-800 rounded-xl p-3.5 text-sm outline-none focus:border-cyan-500 dark:focus:border-cyan-400 transition font-mono leading-relaxed resize-none"></textarea>
         </div>
 
@@ -207,58 +231,135 @@
     </section>
   </main>
 
-  <!-- ================= AI AGENT MODAL ================= -->
+  <!-- ================= WALKING ANIMATED AI MASCOT (ROBOT) ================= -->
+  <div id="walkingRobotContainer" class="fixed bottom-4 z-50 walking-robot select-none cursor-pointer">
+    
+    <!-- Speech Bubble (Need Help? Yes / No) -->
+    <div id="robotSpeechBubble" class="absolute -top-16 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-900 border-2 border-purple-500 rounded-2xl px-3.5 py-1.5 shadow-xl whitespace-nowrap flex items-center gap-2.5 animate-fadeIn">
+      <span class="text-xs font-bold text-gray-800 dark:text-gray-100 flex items-center gap-1">
+        <span>👋</span> কোনো হেল্প লাগবে?
+      </span>
+      <div class="flex items-center gap-1">
+        <button onclick="acceptRobotHelp(event)" class="bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-lg transition active:scale-90">
+          Yes 👍
+        </button>
+        <button onclick="dismissRobotBubble(event)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-[11px] font-bold px-1.5 py-0.5 rounded-lg transition">
+          ✕
+        </button>
+      </div>
+      <!-- Triangle pointer -->
+      <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-purple-500"></div>
+    </div>
+
+    <!-- Animated Robot SVG -->
+    <div onclick="openAiAgentModal()" class="robot-bounce flex flex-col items-center group" title="Click me for AI Help!">
+      <div class="relative w-14 h-14 bg-gradient-to-tr from-purple-600 to-indigo-500 rounded-2xl shadow-lg shadow-purple-500/40 border-2 border-white dark:border-gray-800 flex items-center justify-center transition transform group-hover:scale-110">
+        <!-- Robot Antenna -->
+        <div class="absolute -top-3 w-1.5 h-3 bg-indigo-400 rounded-full flex items-center justify-center">
+          <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-ping"></div>
+        </div>
+        <!-- Robot Face -->
+        <div class="w-10 h-7 bg-gray-950 rounded-xl flex items-center justify-around px-1.5">
+          <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse"></div>
+          <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse"></div>
+        </div>
+      </div>
+      <!-- Robot Legs / Wheel -->
+      <div class="flex gap-2 -mt-1">
+        <div class="w-2 h-2.5 bg-purple-700 rounded-b"></div>
+        <div class="w-2 h-2.5 bg-purple-700 rounded-b"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AI ASSISTANT MODAL (WITH VOICE & CUSTOM STYLE) ================= -->
   <div id="aiModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl animate-fadeIn flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
       <div class="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
         <div class="flex items-center gap-2">
-          <span class="text-2xl">🤖</span>
+          <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-500 flex items-center justify-center text-xl font-bold">
+            🤖
+          </div>
           <div>
-            <h3 class="text-base font-bold text-gray-800 dark:text-gray-100">Fiverr AI Assistant (TOS Compliant)</h3>
-            <p class="text-[11px] text-gray-400">ফাইভারের পলিসি ও ব্যাকরণ মেনে প্রফেশনাল মেসেজ তৈরি করুন</p>
+            <h3 class="text-base font-bold text-gray-800 dark:text-gray-100">Fiverr AI Assistant</h3>
+            <p class="text-[11px] text-gray-400">আপনার নিজস্ব লেখার স্টাইল ও নির্দিষ্ট শব্দসীমায় মেসেজ বানান</p>
           </div>
         </div>
         <button onclick="closeAiModal()" class="text-gray-400 hover:text-red-500 text-lg">✕</button>
       </div>
 
       <div class="overflow-y-auto space-y-4 pr-1 flex-1">
-        <!-- Scenario Selector -->
-        <div>
-          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">মেসেজের ধরন (Scenario):</label>
-          <select id="aiScenario" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:border-purple-500">
-            <option value="revision_update">Revision / Work Update (রিভিশন বা কাজ শেষ করে পাঠানো)</option>
-            <option value="order_delivery">Final Delivery Message (অর্ডার ডেলিভারির চূড়ান্ত নোট)</option>
-            <option value="ask_clarification">Clarification / Question (রিকোয়ারমেন্ট বা ফাইল নিয়ে প্রশ্ন করা)</option>
-            <option value="polite_reply">General Professional Reply (সাধারণ ফ্রেন্ডলি উত্তর)</option>
-            <option value="delay_excuse">Need More Time (টাইম এক্সটেনশন বা দেরির জন্য অনুরোধ)</option>
-          </select>
+        
+        <!-- Controls: Scenario & Length (Short vs Detailed) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">১. মেসেজের ধরন (Scenario):</label>
+            <select id="aiScenario" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:border-purple-500">
+              <option value="revision_update">Revision / Work Update (রিভিশন বা কাজ শেষ করে পাঠানো)</option>
+              <option value="order_delivery">Final Delivery Message (অর্ডার ডেলিভারির চূড়ান্ত নোট)</option>
+              <option value="ask_clarification">Clarification / Question (রিকোয়ারমেন্ট বা ফাইল নিয়ে প্রশ্ন করা)</option>
+              <option value="polite_reply">General Professional Reply (সাধারণ ফ্রেন্ডলি উত্তর)</option>
+              <option value="delay_excuse">Need More Time (টাইম এক্সটেনশন বা দেরির জন্য অনুরোধ)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">২. মেসেজের সাইজ (Length):</label>
+            <select id="aiLength" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 text-xs font-medium outline-none focus:border-purple-500">
+              <option value="short_400">⚡ Short & Crisp (Strictly under 400 characters)</option>
+              <option value="standard">📄 Standard & Balanced (স্বাভাবিক সাইজ)</option>
+              <option value="detailed">📋 Detailed & Descriptive (সম্পূর্ণ পয়েন্টসহ বড় মেসেজ)</option>
+            </select>
+          </div>
         </div>
 
-        <!-- User Prompt / Client Note -->
+        <!-- Optional: Train with Custom Style / Persona -->
         <div>
-          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
-            ক্লায়েন্টের রিকোয়ারমেন্ট বা আপনি কী বলতে চান (বাংলা বা ভাঙা ইংরেজিতে লিখুন):
-          </label>
-          <textarea id="aiClientNotes" rows="4" placeholder="যেমন: ক্লায়েন্ট চেয়েছে লোগোর সাইজ বড় করতে এবং কালার ডার্ক ব্লু করতে। আমি দুইটাই করে ফাইল রেডি করেছি।"
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">৩. আপনার পার্সোনাল লেখার স্টাইল / ফরম্যাট (Optional Training):</label>
+            <button onclick="toggleCustomStyleBox()" class="text-[11px] text-purple-500 hover:underline">Customize Style ▾</button>
+          </div>
+          <textarea id="aiCustomStyle" rows="2" placeholder="যেমন: 'আমি সবসময় Hi [Name] দিয়ে শুরু করি এবং শেষে Best regards দিয়ে শেষ করি। কথা খুব স্পষ্ট ও ফ্রেন্ডলি হতে হবে।'"
+            class="hidden w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-2.5 text-xs outline-none focus:border-purple-500 font-mono"></textarea>
+        </div>
+
+        <!-- User Prompt / Client Note + Voice Input Button -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">
+              ৪. ক্লায়েন্টের রিকোয়ারমেন্ট বা আপনার কথা (মুখে বলুন বা লিখুন):
+            </label>
+            <!-- Voice Input Button -->
+            <button type="button" onclick="startVoiceRecognition()" id="micBtn" class="flex items-center gap-1 text-[11px] bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-lg border border-red-300 dark:border-red-800 font-semibold active:scale-95 transition">
+              <span id="micIcon">🎙️</span>
+              <span id="micText">Voice Type</span>
+            </button>
+          </div>
+          <textarea id="aiClientNotes" rows="3" placeholder="মুখে বলুন অথবা লিখুন (বাংলা বা ইংরেজি)... যেমন: লোগোর কালার চেঞ্জ করেছি এবং ফাইল পিএনজি ফরম্যাটে রেডি করেছি।"
             class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3 text-xs outline-none focus:border-purple-500 resize-none"></textarea>
         </div>
 
         <!-- AI Output Box -->
         <div id="aiResultBox" class="hidden">
-          <label class="block text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1.5">AI Generated Safe Message:</label>
-          <textarea id="aiGeneratedText" rows="5" class="w-full bg-purple-50/50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/60 rounded-xl p-3 text-xs text-gray-800 dark:text-gray-100 font-mono outline-none"></textarea>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="text-xs font-semibold text-purple-600 dark:text-purple-400">AI Generated Safe Message:</label>
+            <span id="aiResultCharCount" class="text-[11px] font-mono text-gray-400">0 chars</span>
+          </div>
+          <textarea id="aiGeneratedText" rows="4" class="w-full bg-purple-50/50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/60 rounded-xl p-3 text-xs text-gray-800 dark:text-gray-100 font-mono outline-none"></textarea>
         </div>
       </div>
 
       <!-- Modal Footer -->
       <div class="flex items-center justify-between pt-4 mt-2 border-t border-gray-100 dark:border-gray-800">
-        <span class="text-[11px] text-gray-400">Powered by Google Gemini</span>
+        <span class="text-[11px] text-gray-400">Fiverr Policy Enforced</span>
         <div class="flex items-center gap-2">
-          <button onclick="generateFiverrMessageWithAI()" id="aiGenBtn" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+          <button onclick="generateFiverrMessageWithAI()" id="aiGenBtn" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-purple-600/20">
             <span>✨</span>
             <span id="aiGenBtnText">Generate Message</span>
           </button>
-          <button id="aiApplyBtn" onclick="applyAiTextToMainInput()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+          <button id="aiApplyBtn" onclick="applyAiTextToMainInput()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-md shadow-emerald-600/20">
             Use This Message ➔
           </button>
         </div>
@@ -277,10 +378,10 @@
       </div>
 
       <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
-        আপনার Google Gemini API Key টি এখানে পেস্ট করে সেভ করুন। এটি আপনার ব্রাউজারে সুরক্ষিত থাকবে।
+        আপনার API Key টি ব্রাউজারে স্থায়ীভাবে সেভ থাকে। বারবার দিতে হবে না।
       </p>
 
-      <input type="password" id="geminiApiKeyInput" placeholder="আপনার API Key এখানে পেস্ট করুন..." 
+      <input type="password" id="geminiApiKeyInput" placeholder="আপনার API Key..." 
         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-purple-500 mb-4 font-mono">
 
       <div class="flex justify-end gap-2">
@@ -403,6 +504,76 @@
       }
     }
 
+    // ================= WALKING ROBOT LOGIC =================
+    function acceptRobotHelp(e) {
+      if (e) e.stopPropagation();
+      openAiAgentModal();
+    }
+
+    function dismissRobotBubble(e) {
+      if (e) e.stopPropagation();
+      const bubble = document.getElementById("robotSpeechBubble");
+      bubble.classList.add("hidden");
+      // 20 সেকেন্ড পর আবার হেল্প বাবল আসবে
+      setTimeout(() => {
+        bubble.classList.remove("hidden");
+      }, 20000);
+    }
+
+    function toggleCustomStyleBox() {
+      const el = document.getElementById("aiCustomStyle");
+      el.classList.toggle("hidden");
+    }
+
+    // ================= VOICE TYPING (WEB SPEECH API) =================
+    let recognition = null;
+    function startVoiceRecognition() {
+      const micBtn = document.getElementById("micBtn");
+      const micText = document.getElementById("micText");
+
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("আপনার ব্রাউজারে ভয়েস টাইপিং সাপোর্ট করে না। দয়া করে Chrome ব্রাউজার ব্যবহার করুন।");
+        return;
+      }
+
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!recognition) {
+        recognition = new SpeechRec();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'bn-BD'; // বাংলা এবং ইংরেজি মিক্সড ধরতে পারে
+
+        recognition.onstart = () => {
+          micText.innerText = "Listening...";
+          micBtn.classList.add("animate-pulse", "bg-red-500", "text-white");
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          const notes = document.getElementById("aiClientNotes");
+          notes.value = (notes.value ? notes.value + " " : "") + transcript;
+        };
+
+        recognition.onerror = (e) => {
+          console.error("Voice error:", e);
+          micText.innerText = "Voice Type";
+          micBtn.classList.remove("animate-pulse", "bg-red-500", "text-white");
+        };
+
+        recognition.onend = () => {
+          micText.innerText = "Voice Type";
+          micBtn.classList.remove("animate-pulse", "bg-red-500", "text-white");
+        };
+      }
+
+      try {
+        recognition.start();
+      } catch (err) {
+        recognition.stop();
+      }
+    }
+
     // ================= AI ASSISTANT (GOOGLE GEMINI) =================
     function openAiAgentModal() {
       const apiKey = localStorage.getItem('gemini_user_api_key');
@@ -454,28 +625,42 @@
 
       const notes = document.getElementById("aiClientNotes").value.trim();
       const scenario = document.getElementById("aiScenario").value;
+      const lengthPreference = document.getElementById("aiLength").value;
+      const customStyle = document.getElementById("aiCustomStyle").value.trim();
       const btn = document.getElementById("aiGenBtnText");
 
       if (!notes) {
-        alert("অনুগ্রহ করে আপনি ক্লায়েন্টকে কী বলতে চান তা সংক্ষেপে লিখুন!");
+        alert("অনুগ্রহ করে আপনি ক্লায়েন্টকে কী বলতে চান তা লিখুন বা ভয়েসে বলুন!");
         return;
       }
 
-      btn.innerText = "AI Generating...";
+      btn.innerText = "Generating...";
 
-      // Fiverr TOS Enforced System Prompt
+      let lengthConstraint = "";
+      if (lengthPreference === 'short_400') {
+        lengthConstraint = "STRICT CONSTRAINT: Keep the entire message very concise, direct, and STRICTLY UNDER 400 CHARACTERS total (optimal for quick revisions).";
+      } else if (lengthPreference === 'detailed') {
+        lengthConstraint = "CONSTRAINT: Write a detailed, reassuring response addressing every single point with clear bullet points where appropriate.";
+      } else {
+        lengthConstraint = "CONSTRAINT: Balanced length, natural and professional.";
+      }
+
       const systemPrompt = `You are an elite, top-rated Fiverr Freelance Communication Specialist.
-Your task is to write a highly professional, polite, concise, and native-sounding English message to a Fiverr client based on the freelancer's notes.
+Write a highly professional, polite, and native-sounding English message to a Fiverr client.
 
-CRITICAL FIVERR TOS (TERMS OF SERVICE) RULES:
+CRITICAL FIVERR TOS RULES:
 1. NEVER mention or suggest contact outside Fiverr (No email, phone, WhatsApp, Skype, Telegram, Zoom, etc.).
-2. NEVER ask for 5-star ratings or positive reviews directly (Strict Fiverr TOS violation). Use compliant phrasing like: "If you are happy with the work, please consider accepting the delivery and sharing your experience."
-3. NEVER discuss outside payments or wire transfers.
+2. NEVER ask for 5-star ratings or positive reviews directly.
+3. NEVER discuss outside payments.
 4. Keep the tone friendly, reassuring, professional, and clear.
-5. Scenario: ${scenario}
-Freelancer's Raw Input/Notes: "${notes}"
 
-Output ONLY the exact final ready-to-send message text. Do not add conversational filler like "Here is your message:".`;
+${lengthConstraint}
+${customStyle ? "USER'S PERSONAL WRITING STYLE / INSTRUCTIONS: " + customStyle : ""}
+
+Scenario: ${scenario}
+Freelancer's Raw Thoughts / Client Requirements: "${notes}"
+
+Output ONLY the exact final ready-to-send message text. Do not add any conversational intro like "Here is your message:".`;
 
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
@@ -492,11 +677,13 @@ Output ONLY the exact final ready-to-send message text. Do not add conversationa
         const generated = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (generated) {
-          document.getElementById("aiGeneratedText").value = generated.trim();
+          const trimmed = generated.trim();
+          document.getElementById("aiGeneratedText").value = trimmed;
+          document.getElementById("aiResultCharCount").innerText = `${trimmed.length} characters`;
           document.getElementById("aiResultBox").classList.remove("hidden");
           document.getElementById("aiApplyBtn").classList.remove("hidden");
         } else {
-          alert("মেসেজ তৈরিতে সমস্যা হয়েছে। API Key টি সঠিক কিনা যাচাই করুন।");
+          alert("মেসেজ তৈরিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
         }
       } catch (err) {
         console.error("AI Generation Error:", err);
@@ -515,7 +702,7 @@ Output ONLY the exact final ready-to-send message text. Do not add conversationa
         closeAiModal();
 
         const statusBox = document.getElementById("statusAlert");
-        document.getElementById("statusAlertText").innerText = "✨ AI দিয়ে তৈরি মেসেজ ইনপুট বক্সে যোগ করা হয়েছে!";
+        document.getElementById("statusAlertText").innerText = "✨ AI দিয়ে তৈরি মেসেজ ইনপুট বক্সে সেট করা হয়েছে!";
         statusBox.classList.remove("hidden");
         setTimeout(() => { statusBox.classList.add("hidden"); }, 6000);
       }
