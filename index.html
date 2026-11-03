@@ -31,35 +31,54 @@
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .animate-fadeIn { animation: fadeIn 0.25s ease-out forwards; }
+    .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
 
-    /* Walking Robot Keyframe Animations */
-    @keyframes robotPatrol {
-      0% { left: 5%; transform: scaleX(1); }
-      48% { left: 85%; transform: scaleX(1); }
-      50% { left: 85%; transform: scaleX(-1); }
-      98% { left: 5%; transform: scaleX(-1); }
-      100% { left: 5%; transform: scaleX(1); }
-    }
-
-    @keyframes robotBob {
+    /* Bobbing idle animation */
+    @keyframes bobbing {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-7px); }
+      50% { transform: translateY(-8px); }
+    }
+    .robot-idle { animation: bobbing 1.8s ease-in-out infinite; }
+
+    /* Panicked Flailing when dragged */
+    @keyframes flailArmLeft {
+      0%, 100% { transform: rotate(15deg); }
+      50% { transform: rotate(-75deg); }
+    }
+    @keyframes flailArmRight {
+      0%, 100% { transform: rotate(-15deg); }
+      50% { transform: rotate(75deg); }
+    }
+    @keyframes kickLegs {
+      0%, 100% { transform: rotate(20deg); }
+      50% { transform: rotate(-20deg); }
     }
 
-    .walking-robot {
-      animation: robotPatrol 30s ease-in-out infinite;
+    .struggling .arm-left {
+      animation: flailArmLeft 0.12s ease-in-out infinite alternate !important;
     }
-    .walking-robot:hover {
-      animation-play-state: paused;
+    .struggling .arm-right {
+      animation: flailArmRight 0.12s ease-in-out infinite alternate !important;
     }
-    .robot-bounce {
-      animation: robotBob 1.2s ease-in-out infinite;
+    .struggling .leg-left {
+      animation: kickLegs 0.15s ease-in-out infinite alternate !important;
+    }
+    .struggling .leg-right {
+      animation: kickLegs 0.15s ease-in-out infinite alternate-reverse !important;
+    }
+
+    /* Parachute Swaying */
+    @keyframes parachuteSway {
+      0%, 100% { transform: rotate(-6deg); }
+      50% { transform: rotate(6deg); }
+    }
+    .parachuting {
+      animation: parachuteSway 1.5s ease-in-out infinite alternate;
     }
   </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-[#070b13] text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200 overflow-x-hidden relative">
+<body class="bg-gray-100 dark:bg-[#070b13] text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200 overflow-x-hidden relative select-none">
 
   <!-- ================= TOP NAVBAR ================= -->
   <header class="w-full bg-white dark:bg-[#0d1424] border-b border-gray-200 dark:border-gray-800 px-4 lg:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40 shadow-sm">
@@ -104,7 +123,7 @@
   </header>
 
   <!-- ================= MAIN FULL-SCREEN DASHBOARD ================= -->
-  <main class="w-full flex-1 p-3 sm:p-5 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start pb-28">
+  <main class="w-full flex-1 p-3 sm:p-5 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start pb-32">
 
     <!-- ====== SIDEBAR: TEMPLATES (Col 12 -> 3 on Desktop) ====== -->
     <aside class="lg:col-span-3 w-full bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 flex flex-col h-[520px] lg:h-[calc(100vh-140px)] shadow-sm">
@@ -186,7 +205,7 @@
             <span class="text-xs sm:text-sm font-bold text-cyan-600 dark:text-cyan-400">Input Message (Client Draft)</span>
             <button onclick="clearInput()" class="text-[11px] text-gray-400 hover:text-red-500 transition">Clear</button>
           </div>
-          <textarea id="inputText" oninput="processText()" placeholder="আপনার ক্লায়েন্টের মেসেজ এখানে লিখুন (নিচের হাঁটতে থাকা রোবটটিকে ক্লিক করে সহায়তা নিতে পারেন)..."
+          <textarea id="inputText" oninput="processText()" placeholder="আপনার ক্লায়েন্টের মেসেজ এখানে লিখুন (নিচে থাকা রোবটটিকে ড্র্যাগ করে যেকোনো জায়গায় নিতে পারেন)..."
             class="w-full h-80 sm:h-96 bg-gray-50 dark:bg-[#070b13] border border-gray-200 dark:border-gray-800 rounded-xl p-3.5 text-sm outline-none focus:border-cyan-500 dark:focus:border-cyan-400 transition font-mono leading-relaxed resize-none"></textarea>
         </div>
 
@@ -231,19 +250,35 @@
     </section>
   </main>
 
-  <!-- ================= WALKING ANIMATED AI MASCOT (ROBOT) ================= -->
-  <div id="walkingRobotContainer" class="fixed bottom-4 z-50 walking-robot select-none cursor-pointer">
+  <!-- ================= DRAGGABLE & PARACHUTE AI MASCOT (ROBOT) ================= -->
+  <div id="robotWrapper" class="fixed z-50 cursor-grab active:cursor-grabbing" style="left: 60px; bottom: 20px;">
     
-    <!-- Speech Bubble (Need Help? Yes / No) -->
-    <div id="robotSpeechBubble" class="absolute -top-16 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-900 border-2 border-purple-500 rounded-2xl px-3.5 py-1.5 shadow-xl whitespace-nowrap flex items-center gap-2.5 animate-fadeIn">
-      <span class="text-xs font-bold text-gray-800 dark:text-gray-100 flex items-center gap-1">
+    <!-- Parachute SVG (Hidden until dropped mid-air) -->
+    <div id="robotParachute" class="absolute -top-[90px] left-1/2 -translate-x-1/2 hidden pointer-events-none transition-all duration-300">
+      <svg width="120" height="95" viewBox="0 0 120 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Parachute Canopy with Stripes -->
+        <path d="M10 50 C 10 10, 110 10, 110 50 C 95 45, 85 45, 75 50 C 65 45, 55 45, 45 50 C 35 45, 25 45, 10 50 Z" fill="#9333ea" />
+        <path d="M45 50 C 55 45, 65 45, 75 50 C 70 20, 50 20, 45 50 Z" fill="#06b6d4" />
+        <path d="M10 50 C 25 45, 35 45, 45 50 C 40 25, 20 28, 10 50 Z" fill="#f43f5e" />
+        <path d="M75 50 C 85 45, 95 45, 110 50 C 100 28, 80 25, 75 50 Z" fill="#f59e0b" />
+        <!-- Strings -->
+        <line x1="12" y1="50" x2="60" y2="92" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <line x1="45" y1="50" x2="60" y2="92" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="75" y1="50" x2="60" y2="92" stroke="#cbd5e1" stroke-width="1.5"/>
+        <line x1="108" y1="50" x2="60" y2="92" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="2 2"/>
+      </svg>
+    </div>
+
+    <!-- Speech Bubble (NEVER FLIPS, ALWAYS READABLE) -->
+    <div id="robotSpeechBubble" class="absolute -top-16 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-900 border-2 border-purple-500 rounded-2xl px-3.5 py-1.5 shadow-2xl whitespace-nowrap flex items-center gap-2 pointer-events-auto transition-transform" style="transform: translate(-50%, 0);">
+      <span id="speechBubbleText" class="text-xs font-bold text-gray-800 dark:text-gray-100 flex items-center gap-1">
         <span>👋</span> কোনো হেল্প লাগবে?
       </span>
-      <div class="flex items-center gap-1">
-        <button onclick="acceptRobotHelp(event)" class="bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-lg transition active:scale-90">
+      <div id="speechActionButtons" class="flex items-center gap-1.5">
+        <button onclick="acceptRobotHelp(event)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-lg transition active:scale-90">
           Yes 👍
         </button>
-        <button onclick="dismissRobotBubble(event)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-[11px] font-bold px-1.5 py-0.5 rounded-lg transition">
+        <button onclick="dismissRobotBubble(event)" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold px-1.5 py-0.5 rounded-lg transition">
           ✕
         </button>
       </div>
@@ -251,25 +286,36 @@
       <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-purple-500"></div>
     </div>
 
-    <!-- Animated Robot SVG -->
-    <div onclick="openAiAgentModal()" class="robot-bounce flex flex-col items-center group" title="Click me for AI Help!">
-      <div class="relative w-14 h-14 bg-gradient-to-tr from-purple-600 to-indigo-500 rounded-2xl shadow-lg shadow-purple-500/40 border-2 border-white dark:border-gray-800 flex items-center justify-center transition transform group-hover:scale-110">
-        <!-- Robot Antenna -->
-        <div class="absolute -top-3 w-1.5 h-3 bg-indigo-400 rounded-full flex items-center justify-center">
-          <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-ping"></div>
+    <!-- Robot Double-Sized Body (Flip applies only here, never to the text!) -->
+    <div id="robotBodyVisual" class="robot-idle relative w-24 h-24 transition-transform duration-150 flex flex-col items-center">
+      
+      <!-- Head / Torso -->
+      <div class="relative w-20 h-16 bg-gradient-to-tr from-purple-700 via-indigo-600 to-purple-500 rounded-2xl shadow-xl shadow-purple-600/40 border-2 border-purple-400 flex items-center justify-center">
+        <!-- Glowing Antenna -->
+        <div class="absolute -top-4 w-2 h-4 bg-indigo-400 rounded-full flex items-center justify-center">
+          <div class="w-3.5 h-3.5 bg-cyan-400 rounded-full animate-ping"></div>
+          <div class="absolute w-3.5 h-3.5 bg-cyan-300 rounded-full shadow-lg shadow-cyan-400"></div>
         </div>
-        <!-- Robot Face -->
-        <div class="w-10 h-7 bg-gray-950 rounded-xl flex items-center justify-around px-1.5">
-          <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse"></div>
-          <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse"></div>
+
+        <!-- Face Screen -->
+        <div class="w-16 h-10 bg-gray-950 rounded-xl border border-purple-900/60 flex items-center justify-around px-2 shadow-inner">
+          <div class="w-3.5 h-3.5 bg-cyan-400 rounded-full animate-pulse shadow-md shadow-cyan-400"></div>
+          <div class="w-3.5 h-3.5 bg-cyan-400 rounded-full animate-pulse shadow-md shadow-cyan-400"></div>
         </div>
+
+        <!-- Left Arm -->
+        <div class="arm-left absolute -left-2.5 top-4 w-2.5 h-8 bg-purple-600 border border-purple-400 rounded-full origin-top"></div>
+        <!-- Right Arm -->
+        <div class="arm-right absolute -right-2.5 top-4 w-2.5 h-8 bg-purple-600 border border-purple-400 rounded-full origin-top"></div>
       </div>
-      <!-- Robot Legs / Wheel -->
-      <div class="flex gap-2 -mt-1">
-        <div class="w-2 h-2.5 bg-purple-700 rounded-b"></div>
-        <div class="w-2 h-2.5 bg-purple-700 rounded-b"></div>
+
+      <!-- Legs / Wheels -->
+      <div class="flex gap-4 -mt-1 w-12 justify-around">
+        <div class="leg-left w-3.5 h-5 bg-indigo-800 border border-purple-500 rounded-b-xl origin-top"></div>
+        <div class="leg-right w-3.5 h-5 bg-indigo-800 border border-purple-500 rounded-b-xl origin-top"></div>
       </div>
     </div>
+
   </div>
 
   <!-- ================= AI ASSISTANT MODAL (WITH VOICE & CUSTOM STYLE) ================= -->
@@ -279,7 +325,7 @@
       <!-- Modal Header -->
       <div class="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-500 flex items-center justify-center text-xl font-bold">
+          <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-500 flex items-center justify-center text-2xl font-bold">
             🤖
           </div>
           <div>
@@ -332,7 +378,7 @@
               ৪. ক্লায়েন্টের রিকোয়ারমেন্ট বা আপনার কথা (মুখে বলুন বা লিখুন):
             </label>
             <!-- Voice Input Button -->
-            <button type="button" onclick="startVoiceRecognition()" id="micBtn" class="flex items-center gap-1 text-[11px] bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-lg border border-red-300 dark:border-red-800 font-semibold active:scale-95 transition">
+            <button type="button" onclick="startVoiceRecognition()" id="micBtn" class="flex items-center gap-1 text-[11px] bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg border border-red-300 dark:border-red-800 font-semibold active:scale-95 transition">
               <span id="micIcon">🎙️</span>
               <span id="micText">Voice Type</span>
             </button>
@@ -421,7 +467,7 @@
     </div>
   </div>
 
-  <!-- ================= SCRIPT LOGIC ================= -->
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const defaultKeywords = [
       "call", "email", "mail", "whatsapp", "skype", "phone", "number", 
@@ -504,7 +550,164 @@
       }
     }
 
-    // ================= WALKING ROBOT LOGIC =================
+    // ================= ADVANCED DRAGGABLE + PARACHUTE ROBOT ENGINE =================
+    const robot = document.getElementById("robotWrapper");
+    const robotVisual = document.getElementById("robotBodyVisual");
+    const parachute = document.getElementById("robotParachute");
+    const bubble = document.getElementById("robotSpeechBubble");
+    const bubbleText = document.getElementById("speechBubbleText");
+    const bubbleBtns = document.getElementById("speechActionButtons");
+
+    let posX = 60;
+    let posY = 20; // from bottom
+    let direction = 1; // 1 = moving right, -1 = moving left
+    let speed = 1.2;
+    let isDragging = false;
+    let isParachuting = false;
+    let isHovered = false;
+    let dragStartX, dragStartY, initialLeft, initialTop;
+
+    // Ground Walking Patrol Loop
+    function robotMovementLoop() {
+      if (!isDragging && !isParachuting && !isHovered) {
+        const screenWidth = window.innerWidth;
+        const robotWidth = 100;
+
+        posX += speed * direction;
+
+        // Boundaries: 40px to (screenWidth - 140px)
+        if (posX > screenWidth - 140) {
+          direction = -1;
+          robotVisual.style.transform = "scaleX(-1)"; // Only flip robot body!
+        } else if (posX < 40) {
+          direction = 1;
+          robotVisual.style.transform = "scaleX(1)"; // Only flip robot body!
+        }
+
+        robot.style.left = posX + "px";
+        robot.style.bottom = "20px";
+        robot.style.top = "auto";
+      }
+
+      // Parachute Descent Physics
+      if (isParachuting) {
+        let currentTop = parseFloat(robot.style.top) || 0;
+        const targetTop = window.innerHeight - 130;
+
+        if (currentTop < targetTop) {
+          currentTop += 2.2; // Smooth gentle float speed
+          robot.style.top = currentTop + "px";
+        } else {
+          // Landing completed!
+          isParachuting = false;
+          parachute.classList.add("hidden");
+          robot.classList.remove("parachuting");
+          bubbleText.innerHTML = "<span>🎉</span> সেফ ল্যান্ডিং করেছি!";
+          bubbleBtns.classList.remove("hidden");
+          setTimeout(() => {
+            bubbleText.innerHTML = "<span>👋</span> কোনো হেল্প লাগবে?";
+          }, 3500);
+
+          // Reset to bottom walk mode
+          posY = 20;
+          robot.style.top = "auto";
+          robot.style.bottom = "20px";
+        }
+      }
+
+      requestAnimationFrame(robotMovementLoop);
+    }
+    requestAnimationFrame(robotMovementLoop);
+
+    // Hover pauses patrol
+    robot.addEventListener("mouseenter", () => { isHovered = true; });
+    robot.addEventListener("mouseleave", () => { isHovered = false; });
+
+    // Dragging Logic (Mouse & Touch)
+    function onDragStart(clientX, clientY) {
+      if (isParachuting) return;
+      isDragging = true;
+
+      const rect = robot.getBoundingClientRect();
+      dragStartX = clientX;
+      dragStartY = clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      // Switch coordinates from bottom to top for free dragging
+      robot.style.bottom = "auto";
+      robot.style.left = initialLeft + "px";
+      robot.style.top = initialTop + "px";
+
+      // Struggle Animation
+      robot.classList.add("struggling");
+      bubbleText.innerHTML = "<span>😵</span> আরেহ! ছেড়ে দাও! আমাকে নামাও!";
+      bubbleBtns.classList.add("hidden");
+      bubble.classList.remove("hidden");
+    }
+
+    function onDragMove(clientX, clientY) {
+      if (!isDragging) return;
+      const deltaX = clientX - dragStartX;
+      const deltaY = clientY - dragStartY;
+
+      let newLeft = initialLeft + deltaX;
+      let newTop = initialTop + deltaY;
+
+      // Screen boundary clamp
+      newLeft = Math.max(10, Math.min(window.innerWidth - 110, newLeft));
+      newTop = Math.max(10, Math.min(window.innerHeight - 120, newTop));
+
+      robot.style.left = newLeft + "px";
+      robot.style.top = newTop + "px";
+      posX = newLeft;
+    }
+
+    function onDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      robot.classList.remove("struggling");
+
+      const rect = robot.getBoundingClientRect();
+      const groundTop = window.innerHeight - 130;
+
+      // If released high above the ground, open parachute!
+      if (rect.top < groundTop - 40) {
+        isParachuting = true;
+        parachute.classList.remove("hidden");
+        robot.classList.add("parachuting");
+        bubbleText.innerHTML = "<span>🪂</span> প্যারাস্যুট দিয়ে নামছি...";
+      } else {
+        // Already on ground
+        robot.style.top = "auto";
+        robot.style.bottom = "20px";
+        bubbleText.innerHTML = "<span>👋</span> কোনো হেল্প লাগবে?";
+        bubbleBtns.classList.remove("hidden");
+      }
+    }
+
+    // Mouse Drag Listeners
+    robot.addEventListener("mousedown", (e) => {
+      if (e.target.closest("#robotSpeechBubble")) return; // Don't drag if clicking buttons
+      onDragStart(e.clientX, e.clientY);
+    });
+    window.addEventListener("mousemove", (e) => onDragMove(e.clientX, e.clientY));
+    window.addEventListener("mouseup", onDragEnd);
+
+    // Touch Drag Listeners (Mobile / Tablet)
+    robot.addEventListener("touchstart", (e) => {
+      if (e.target.closest("#robotSpeechBubble")) return;
+      const t = e.touches[0];
+      onDragStart(t.clientX, t.clientY);
+    }, { passive: true });
+    window.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      const t = e.touches[0];
+      onDragMove(t.clientX, t.clientY);
+    }, { passive: true });
+    window.addEventListener("touchend", onDragEnd);
+
+    // Speech Bubble Interactions
     function acceptRobotHelp(e) {
       if (e) e.stopPropagation();
       openAiAgentModal();
@@ -512,11 +715,13 @@
 
     function dismissRobotBubble(e) {
       if (e) e.stopPropagation();
-      const bubble = document.getElementById("robotSpeechBubble");
       bubble.classList.add("hidden");
-      // 20 সেকেন্ড পর আবার হেল্প বাবল আসবে
       setTimeout(() => {
-        bubble.classList.remove("hidden");
+        if (!isDragging && !isParachuting) {
+          bubbleText.innerHTML = "<span>👋</span> কোনো হেল্প লাগবে?";
+          bubbleBtns.classList.remove("hidden");
+          bubble.classList.remove("hidden");
+        }
       }, 20000);
     }
 
@@ -532,7 +737,7 @@
       const micText = document.getElementById("micText");
 
       if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert("আপনার ব্রাউজারে ভয়েস টাইপিং সাপোর্ট করে না। দয়া করে Chrome ব্রাউজার ব্যবহার করুন।");
+        alert("আপনার ব্রাউজারে ভয়েস টাইপিং সাপোর্ট করে না। দয়া করে Google Chrome ব্যবহার করুন।");
         return;
       }
 
@@ -542,7 +747,7 @@
         recognition = new SpeechRec();
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = 'bn-BD'; // বাংলা এবং ইংরেজি মিক্সড ধরতে পারে
+        recognition.lang = 'bn-BD';
 
         recognition.onstart = () => {
           micText.innerText = "Listening...";
